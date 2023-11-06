@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void copiarC(FILE *a, FILE *b) {
+	char c;
+	c = fgetc(a);
+	while (!feof(a)) {
+		fputc(c, b);
+		putchar(c);
+		c = fgetc(a);
+	}
+}
+
+void copiarS(FILE *a, FILE *b) {
+	char w[100];
+	while (!feof(a)) {
+		fgets(w, 100, a);
+		printf("%s", w);
+		fputs(w, b);
+	}
+}
+
+void copiarRW(FILE *a, FILE *b) {
+	const int size = 1;
+	char w[size] = {};
+	fread(w, sizeof(char), size, a);
+	while (!feof(a)) {
+		fwrite(w, sizeof(char), size, b);
+		printf("%s", w);
+		fread(w, sizeof(char), size, a);
+	}
+}
+
+int main(int argc, char *argv[]) {
+	FILE *file0, *file1;
+
+	file0 = fopen("in.txt", "r");
+	file1 = fopen("out.txt", "w");
+	if (!file0) {
+		printf("Error al abrir el archivo.\n");
+		return 1;
+	}
+	if (!file1) {
+		printf("Error al abrir el archivo.\n");
+		fclose(file1);
+		return 1;
+	}
+	
+	/*copiarC(file0, file1);*/
+	/*copiarS(file0, file1);*/
+	copiarRW(file0, file1);
+	
+	fclose(file0);
+	fclose(file1);
+	return 0;
+}
+

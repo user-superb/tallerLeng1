@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+	FILE *file;
+	file = fopen("jugadores.dat", "r+b");
+	if (!file) {
+		printf("No se pudo abrir el archivo");
+		return 0;
+	}
+	
+	fseek(file, 0, SEEK_END); // Me posiciono al final
+	
+	printf("Tamaño archivo: %ld bytes", ftell(file));
+	
+	// ftell cuenta los bytes desde donde este ubicado *file hasta el principio del archivo
+	
+	return 0;
+}

@@ -1,0 +1,141 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	char nombreApellido[30];
+	unsigned int edad;
+	unsigned int titulos;
+	unsigned int rank;
+	double fortuna;
+} jugador;
+
+void almacenarJugador(FILE *file, jugador* dato) {
+	fwrite(dato, sizeof(jugador), 1, file);
+}
+
+void informarMejorJugador(FILE *file) {
+	fseek(file, 0, SEEK_SET);
+	
+	jugador *aux = (jugador*) malloc(sizeof(jugador));
+	jugador p;
+	fread(aux, sizeof(jugador), 1, file);
+	p = *aux;
+	
+	while (!feof(file)) {
+		if (aux->rank < p.rank) {
+			p = *aux;
+		}
+		
+		fread(aux, sizeof(jugador), 1, file);
+	}
+	
+	printf("Jugador [RANK: %d]: %s\n", p.rank , p.nombreApellido);
+}
+
+void informarMayorTitulos(FILE *file) {
+	fseek(file, 0, SEEK_SET);
+	
+	jugador *aux = (jugador*) malloc(sizeof(jugador)); // Necesita memoria reservada para enchufar los valores.
+	jugador p;
+	fread(aux, sizeof(jugador), 1, file);
+	p = *aux;
+	
+	while (!feof(file)) {
+		if (aux->titulos > p.titulos) {
+			p = *aux;
+		}
+		
+		fread(aux, sizeof(jugador), 1, file);
+	}
+	
+	printf("Jugador [TITULOS: %d]: %s\n", p.titulos, p.nombreApellido);
+}
+
+int actualizarJugador(FILE *file, char nombreApellido[30], int nuevoRank) {
+	jugador *aux = (jugador*) malloc(sizeof(jugador));
+	jugador *p = NULL;
+	
+	int encontro = 0;
+	
+	fseek(file, 0, SEEK_SET);
+	
+	while (!feof(file) && !encontro) {
+		fread(aux, sizeof(jugador), 1, file);
+		if (!strcmp(aux->nombreApellido, nombreApellido)) {
+			p = aux;
+			encontro = !encontro;
+		}
+	}
+	
+	if (encontro) {
+		p->rank = nuevoRank;
+		fseek(file, -sizeof(jugador), SEEK_CUR);
+		fwrite(p, sizeof(jugador), 1, file);
+	}
+	
+	return encontro;
+}
+
+void informarJugadores(FILE *file) {
+	fseek(file, 0, SEEK_SET);
+	jugador *aux = (jugador*) malloc(sizeof(jugador));
+	fread(aux, sizeof(jugador), 1, file);
+	
+	while (!feof(file)) {
+		printf("Jugador: %s [EDAD: %u] [RANK: %u] [TITULOS: %u]\n", aux->nombreApellido, aux->edad, aux->rank, aux->titulos);
+		fread(aux, sizeof(jugador), 1, file);
+	}
+}
+
+int main(int argc, char *argv[]) {
+	FILE *file;
+	file = fopen("jugadores.dat", "wb+");
+	
+	if (!file) {
+		printf("No se pudo abrir el archivo.");
+		return 1;
+	}
+	
+	jugador aux = {};
+	
+	printf("Nombre y Apellido: ");
+	scanf("%s", aux.nombreApellido);
+	
+	while (strcmp(aux.nombreApellido, "FIN")) {
+		printf("Edad: ");
+		scanf("%u", &(aux.edad));
+		printf("Titulos: ");
+		scanf("%u", &(aux.titulos));
+		printf("Ranking: ");
+		scanf("%u", &(aux.rank));
+		printf("Fortuna: ");
+		scanf("%lf", &(aux.fortuna));
+		
+		almacenarJugador(file, &aux);
+		
+		printf("Nombre y Apellido: ");
+		scanf("%s", aux.nombreApellido);
+	}
+	
+	printf("Actualizar Ranking:\nNombre y Apellido: ");
+	scanf("%s", aux.nombreApellido);
+	
+	while (strcmp(aux.nombreApellido, "ZZZ")) {
+		printf("Nuevo Ranking: ");
+		scanf("%u", &(aux.rank));
+		if (!actualizarJugador(file, aux.nombreApellido, aux.rank)) {
+			printf("No se encontro el jugador.\n");
+		}
+		
+		printf("Nombre y Apellido: ");
+		scanf("%s", aux.nombreApellido);
+	}
+	
+	informarJugadores(file);
+	
+	fclose(file);
+	
+	return 0;
+}
+

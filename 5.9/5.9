@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	char nombreApellido[30];
+	unsigned int edad;
+	unsigned int titulos;
+	unsigned int rank;
+	double fortuna;
+} jugador;
+
+void almacenarJugador(FILE *file, jugador* dato) {
+	fwrite(dato, sizeof(jugador), 1, file);
+}
+
+void informarMejorJugador(FILE *file) {
+	fseek(file, 0, SEEK_SET);
+	
+	jugador *aux = (jugador*) malloc(sizeof(jugador));
+	jugador p;
+	fread(aux, sizeof(jugador), 1, file);
+	p = *aux;
+	
+	while (!feof(file)) {
+		if (aux->rank < p.rank) {
+			p = *aux;
+		}
+		
+		fread(aux, sizeof(jugador), 1, file);
+	}
+	
+	printf("Jugador [RANK: %d]: %s\n", p.rank , p.nombreApellido);
+}
+
+void informarMayorTitulos(FILE *file) {
+	fseek(file, 0, SEEK_SET);
+	
+	jugador *aux = (jugador*) malloc(sizeof(jugador)); // Necesita memoria reservada para enchufar los valores.
+	jugador p;
+	fread(aux, sizeof(jugador), 1, file);
+	p = *aux;
+	
+	while (!feof(file)) {
+		if (aux->titulos > p.titulos) {
+			p = *aux;
+		}
+		
+		fread(aux, sizeof(jugador), 1, file);
+	}
+	
+	printf("Jugador [TITULOS: %d]: %s\n", p.titulos, p.nombreApellido);
+}
+
+int main(int argc, char *argv[]) {
+	FILE *file;
+	file = fopen("jugadores.dat", "wb+");
+	
+	if (!file) {
+		printf("No se pudo abrir el archivo.");
+		return 1;
+	}
+	
+	jugador aux = {};
+	
+	printf("Nombre y Apellido: ");
+	scanf("%s", aux.nombreApellido);
+	
+	while (strcmp(aux.nombreApellido, "FIN")) {
+		printf("Edad: ");
+		scanf("%u", &(aux.edad));
+		printf("Titulos: ");
+		scanf("%u", &(aux.titulos));
+		printf("Ranking: ");
+		scanf("%u", &(aux.rank));
+		printf("Fortuna: ");
+		scanf("%lf", &(aux.fortuna));
+		
+		almacenarJugador(file, &aux);
+		
+		printf("\nNombre y Apellido: ");
+		scanf("%s", aux.nombreApellido);
+	}
+	
+	informarMejorJugador(file);
+	informarMayorTitulos(file);
+	
+	fclose(file);
+	
+	return 0;
+}
+

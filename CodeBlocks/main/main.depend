@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1699205822 source:c:\users\superuser\documents\c\codeblocks\main\hora.c
+	<stdio.h>
+	"hora.h"
+
+1699203722 c:\users\superuser\documents\c\codeblocks\main\hora.h
+
+1699205862 source:c:\users\superuser\documents\c\codeblocks\main\main.c
+	<stdio.h>
+	<stdlib.h>
+	"hora.h"
+
